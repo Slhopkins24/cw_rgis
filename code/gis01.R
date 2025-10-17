@@ -35,21 +35,33 @@ st_distance(sf_ft_utm)
 #exercise today
 
 #load data
-quakes
+## load data
+## lat and long represent latitude and longitude
 df_quakes <- as_tibble(quakes)
-print(df_quakes)
 
-#convert
+## convert to an `sf` object
 sf_quakes <- df_quakes %>% 
-  st_as_sf(coords = c("long", "lat"), crs = 4326)
-  
+  st_as_sf(coords = c("long", "lat"),
+           crs = 4326)
+
+## map `sf_quakes`
 mapview(sf_quakes)
-st_bbox(sf_quakes)
 
-sf_quakes <- sf_site %>% slice(c(1,2))
+## select the first two sites
+sf_ft_quakes <- sf_quakes %>% 
+  slice(c(1, 2))
 
-#calculate
+## convert geodetic CRS to projected CRS (UTM 60S)
+sf_ft_quakes_proj <- sf_ft_quakes %>% 
+  st_transform(crs = 32760)
 
+## calculate geographic distance
+st_distance(sf_ft_quakes_proj)
+st_distance(sf_ft_quakes)
+
+## export
+saveRDS(sf_quakes,
+        file = here::here("data/sf_quakes.rds"))
 
 
 
