@@ -61,6 +61,46 @@ spr_prec_ncne <- terra::rast("data/spr_prec_ncne.tif")
 
 spr_prec_ncne
 
+#1. there are 162,
+
+library(ggplot2)
+library(tidyterra)
+
+ggplot() +
+  geom_spatraster(data = spr_prec_ncne) +
+  scale_fill_viridis_c(name = "Precipitation (mm)") +
+  labs(title = "Spring Precipitation in North Carolina") +
+  theme_minimal()
+
+library(sf)
+sf_site <- readRDS("data/sf_finsync_nc.rds")
+
+df_xy <- st_coordinates(sf_site)
+head(df_xy)
+
+df_land <- terra::extract(spr_land, df_xy)
+head(df_land)
+
+table(df_land[[2]]) # column 2 holds land use values
+which.max(table(df_land[[2]])) # most frequent category
+
+# Example: 3 = urban
+rcl <- matrix(c(3, 3, 1,   # urban = 1
+                1, 2, 0,   # all others = 0
+                4, 10, 0), # if more classes exist
+              ncol = 3, byrow = TRUE)
+
+spr_urban <- classify(spr_land, rcl = rcl)
+
+urban_cells <- freq(spr_urban)
+urban_prop <- urban_cells[urban_cells$value == 1, "count"] / sum(urban_cells$count)
+urban_prop
+
+
+
+
+
+
 
 
 
